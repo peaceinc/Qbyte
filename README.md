@@ -22,7 +22,8 @@ python QByte.py auto FamilyGathering
 As you run a session, two files are produced that are timestamped with the initialization. The one labeled '*_C.txt' contains any comments you entered, and the other contains the raw data.
   
 To re-analyze the raw data from a prior session, run 'QBread.py' as follows:
-python QBread.py <input file>
+
+python QBread.py input_file
   
 Example:
 
