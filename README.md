@@ -7,7 +7,7 @@ Steps to run locally:
 2. Configure your desired settings at the top of 'QByte.py'. The comments explain what each setting is.
 3. Run 'QByte.py' from the command line as follows:
 
-python QByte.py <mode> <remarks>
+python QByte.py mode remarks
 
 MODE: This can be 'static' or 'auto'. The only difference between the two is that the 'auto' mode will automatically switch views.
 
