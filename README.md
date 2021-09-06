@@ -14,7 +14,9 @@ MODE: This can be 'static' or 'auto'. The only difference between the two is tha
 REMARKS: This is an easy way to remember your session. You can input anything without spaces.
   
 Examples:
+
 python QByte.py static BirthdayParty
+
 python QByte.py auto FamilyGathering
   
 As you run a session, two files are produced that are timestamped with the initialization. The one labeled '*_C.txt' contains any comments you entered, and the other contains the raw data.
@@ -23,5 +25,5 @@ To re-analyze the raw data from a prior session, run 'QBread.py' as follows:
 python QBread.py <input file>
   
 Example:
-  
+
 python QBread.py QB_1630886880_BirthdayParty.txt
