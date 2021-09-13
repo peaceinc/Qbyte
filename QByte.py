@@ -32,7 +32,7 @@ UseTrueRNG = True#Set to 'False' if you do not have TrueRNG hardware set up. Thi
 HALO = True#Set to 'True' only if you have 4 or more TrueRNGs
 TurboUse = False#Set to 'True' only if you have a TurboRNG
 
-autofreq = 120#how often to switch view in seconds if ran in 'auto' mode
+autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
 
 mType = sys.argv[1]#static,auto,nye
 Rmks = sys.argv[2]#remarks
@@ -949,14 +949,7 @@ def animate(i):
     
     
 
-    for a in range (0,len(riprise)):
-        if StartXT<=riprise[a]<=NowXT:
-            ax2.axvline(x=riprise[a],color='lightblue')
-            ax3.axvline(x=riprise[a],color='lightblue')
-    for a in range (0,len(ripset)):
-        if StartXT<=ripset[a]<=NowXT:
-            ax2.axvline(x=ripset[a],color='pink')
-            ax3.axvline(x=ripset[a],color='pink')
+
             
     QBsums.append(AC[1])
     axQB.append(np.sum(QBsums)-(len(ult_t)*NEDspeed*8*0.5))
@@ -981,6 +974,15 @@ def animate(i):
         ax3.plot(ult_t,Mstd,color='aqua',linestyle='--')
         ax3.plot(ult_t,Rplt,color='red',label='rotation')
         ax3.plot(ult_t,Rstd,color='red',linestyle='--')
+        
+        for a in range (0,len(riprise)):
+            if StartXT<=riprise[a]<=NowXT:
+                ax2.axvline(x=riprise[a],color='lightblue')
+                ax3.axvline(x=riprise[a],color='lightblue')
+        for a in range (0,len(ripset)):
+            if StartXT<=ripset[a]<=NowXT:
+                ax2.axvline(x=ripset[a],color='pink')
+                ax3.axvline(x=ripset[a],color='pink')
 
 
     else:
