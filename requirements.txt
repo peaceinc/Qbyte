@@ -1,0 +1,8 @@
+matplotlib
+numpy
+serial
+pyserial
+scipy
+tk
+astral
+datetime
