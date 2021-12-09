@@ -4,8 +4,9 @@ Data Visualization for Qbyte Processing
 Steps to run locally:
 
 1. Clone this directory onto your local machine
-2. Configure your desired settings at the top of 'QByte.py'. The comments explain what each setting is.
-3. Run 'QByte.py' from the command line as follows:
+2. Run 'pip install -r requirements.txt'
+3. Configure your desired settings at the top of 'QByte.py'. The comments explain what each setting is.
+4. Run 'QByte.py' from the command line as follows:
 
 python QByte.py mode remarks
 
