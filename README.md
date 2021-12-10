@@ -31,9 +31,3 @@ python QBread.py input_file
 Example:
 
 python QBread.py QB_1630886880_BirthdayParty.txt
-
-## Technologies Used
-
-The web3.storage will be used in conjunction with our municipal art registry, which has been authorized for a grant by the NEAR foundation and is currently undergoing review by the city of Alameda, CA (see https://www.municipalartregistry.org/ - password 'halo'). Namely, an artist who submits a profile to the registry will automatically have their data uploaded to the decentralized web storage platform, and an NFT with that data will be created. The artist can mint additional NFTs by uploading their art in the integrated web3.storage. As an experimental aspect, QByte.py will be used in a myriad of ways, such as experiments to improve the mental "flow-states" in the creators who use our platform.
-
-The Alameda Art Registry project has an ambitious but well-supported goal of onboarding 1000 artists and 100 small buisinesses, thereby turning Alameda into an international arts destination. With success, other municipalities can clone our repository and impliment the technology to improve their municipal art programs and policies.
