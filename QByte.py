@@ -1,3 +1,4 @@
+from mpl_toolkits.mplot3d import Axes3D  # required import for some machines to render 3d projection
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
@@ -8,6 +9,7 @@ from serial.tools import list_ports
 import time
 import math
 import scipy.stats
+import matplotlib.gridspec as gridspec
 import warnings
 from matplotlib.widgets import Button
 import tkinter as tk
@@ -26,11 +28,10 @@ DotSize = 4444
 wordsize = 36
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
-RandomSrc = 'ipfs'#'trng' = TrueRNG hardware ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, HALO=True, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
-HALO = True#Set to 'True' only if you have 4 or more TrueRNGs
-SupHALO = True#Set to 'True' only if you have 8 or more TrueRNGs
+RandomSrc = 'ipfs'#'trng' = TrueRNG hardware ... 'prng' = pseudo RNG (REQUIRED TurboUse=False) ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, HALO=True, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
+SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
 TurboUse = True#Set to 'True' only if you have a TurboRNG
-
+#trouble may occur if using Turbo without NEDs
 
 autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
 
@@ -42,6 +43,11 @@ Rmks = sys.argv[2]#remarks
 outpath = os.getcwd()
 
 TurboSpeed = NEDspeed
+
+if RandomSrc=='prng':
+    HALO = False
+else:
+    HALO = True
 
 
 starttime = int(time.time()*1000)
