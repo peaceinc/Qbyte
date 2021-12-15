@@ -35,8 +35,18 @@ TurboUse = True#Set to 'True' only if you have a TurboRNG
 
 autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
 
-mType = sys.argv[1]#static,auto,nye
-Rmks = sys.argv[2]#remarks
+# check if optional args are provided, assign to None if not provided
+try:
+    mType = sys.argv[1]#static,auto,nye
+except:
+    # define a default other than "None" in try/except statement below?
+    mType = "auto"
+
+try:
+    Rmks = sys.argv[2]#remarks
+except:
+    # define a default other than "None"?
+    Rmks = "remarks"
 
 ###########
 
