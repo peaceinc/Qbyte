@@ -26,7 +26,13 @@ outpath = os.getcwd()
 anlzfile = [sys.argv[1]]
 
 for a in range (0,len(anlzfile)):
-    readFile = open('%s\%s'%(outpath,anlzfile[a]),'r')
+    # if Windows operating system
+    if os.name=='nt':
+        readFile = open('%s\%s'%(outpath,anlzfile[a]),'r')
+    # if Mac/Linux/BSD operating system
+    elif os.name=='posix':
+        readFile = open('%s/%s'%(outpath,anlzfile[a]),'r')
+    
     if a==0:
         sepfile = readFile.read().split('\n')
     else:

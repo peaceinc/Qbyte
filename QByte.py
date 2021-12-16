@@ -435,33 +435,33 @@ for line in range(0,len(Lines)):
 
 if RandomSrc=='trng':
 
-    
-    
+
+
     ports=dict()  
     ports_avaiable = list(list_ports.comports())
-    
-    
+
+
     rngcomports = []
     turbocom = None
-    
+
     for temp in ports_avaiable:
         if HALO==True:
-        	if temp[1].startswith("TrueRNG"):
-        		if 'pro' in temp[1]:
-        			print ('found pro')
-        			turbocom = str(temp[0])
-        		else:
-        			print('Found:           ' + str(temp))
-        			rngcomports.append(str(temp[0]))
+            if temp[1].startswith("TrueRNG"):
+                if 'pro' in temp[1]:
+                    print ('found pro')
+                    turbocom = str(temp[0])
+                else:
+                    print('Found:           ' + str(temp))
+                    rngcomports.append(str(temp[0]))
         else:
-        	if temp[1].startswith("TrueRNG"):
-        		print ('found device')
-        		turbocom = str(temp[0])
-            
+            if temp[1].startswith("TrueRNG"):
+                print ('found device')
+                turbocom = str(temp[0])
+
     if HALO==True:
         ser = []            
         for a in range(0,len(rngcomports)):
-        	ser.append (serial.Serial(port=rngcomports[a],timeout=10))    
+            ser.append (serial.Serial(port=rngcomports[a],timeout=10))
     if TurboUse==True:
         turboser= (serial.Serial(port=turbocom,timeout=10)) 
     
@@ -474,12 +474,12 @@ if RandomSrc=='trng':
     
     if HALO==True:
         for a in range(0,len(rngcomports)):
-        	if(ser[a].isOpen() == False):
-        		ser[a].open()
-        
-        	ser[a].setDTR(True)
-        	ser[a].flushInput()
-    if TurboUse==True:
+            if(ser[a].isOpen() == False):
+                ser[a].open()
+            ser[a].setDTR(True)
+            ser[a].flushInput()
+
+if TurboUse==True:
         if turboser.isOpen()==False:
             turboser.open()
         turboser.setDTR(True)
