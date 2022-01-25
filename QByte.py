@@ -28,10 +28,13 @@ DotSize = 4444
 wordsize = 36
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
-RandomSrc = 'ipfs'#'trng' = TrueRNG hardware ... 'prng' = pseudo RNG (REQUIRED TurboUse=False) ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, HALO=True, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
+RandomSrc = 'trng'#'trng' = TrueRNG hardware ... 'prng' = pseudo RNG (REQUIRED TurboUse=False) ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, HALO=True, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
 SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
-TurboUse = True#Set to 'True' only if you have a TurboRNG
+TurboUse = False#Set to 'True' only if you have a TurboRNG
 #trouble may occur if using Turbo without NEDs
+
+MaxFileTime = 3600#number of seconds of data to store to an individual output file
+PushEstuary = False#uploads data to web3 at MaxFileTime interval, requires curl
 
 autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
 
@@ -51,7 +54,7 @@ else:
 
 
 starttime = int(time.time()*1000)
-outfile = open('%s/QB_%d_%s.txt'%(outpath,int(starttime/1000),Rmks),'w')
+outfile = open('%s/QB_%d_0_%s.txt'%(outpath,int(starttime/1000),Rmks),'w')
 cmtfile = open('%s/QB_%d_%s_C.txt'%(outpath,int(starttime/1000),Rmks),'w')
 
 outfile.write('ColorZ: %f RotZ: %f RNG params: %s %s %s\n'%(ColorZ,RotZ,RandomSrc,HALO,TurboUse))
@@ -341,6 +344,14 @@ def MkShape(shp):
     
     return ShapeC,sNode,Node,Msorted,Dist,WM
     
+def newfile(n):
+    global outfile
+    outfile.close()
+
+    if PushEstuary==True:
+        os.system('curl -X POST https://shuttle-5.estuary.tech/content/add -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" -H "Accept: application/json" -H "Content-Type: multipart/form-data" -F "data=@%s/QB_%d_%d_%s.txt"'%(outpath,int(starttime/1000),n-1,Rmks))
+
+    outfile = open('%s/QB_%d_%d_%s.txt'%(outpath,int(starttime/1000),n,Rmks),'w')
 
 def printInput():
     inp = inputtxt.get(1.0, "end-1c")
@@ -841,12 +852,14 @@ def GetI(uu,vv,typidx):
 def animate(i):
     
 
-    
     ax1.clear()
     ax2.clear()
     ax3.clear()
     ax4.clear()
     ax4t.clear()
+
+    if len(ult_t)%MaxFileTime==0 and len(ult_t)>0:
+        newfile(int(len(ult_t)/MaxFileTime))
     
     reds=[]
     greens=[]
