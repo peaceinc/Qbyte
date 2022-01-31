@@ -28,9 +28,9 @@ DotSize = 4444
 wordsize = 36
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
-RandomSrc = 'prng'#'trng' = TrueRNG hardware ... 'prng' = pseudo RNG (REQUIRED TurboUse=False) ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, HALO=True, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
+RandomSrc = 'ipfs'#'trng' = TrueRNG hardware ... 'prng' = pseudo RNG (REQUIRED TurboUse=False) ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
 SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
-TurboUse = False#Set to 'True' only if you have a TurboRNG
+TurboUse = True#Set to 'True' only if you have a TurboRNG or are running with RandomSrc = 'ipfs'
 #trouble may occur if using Turbo without NEDs
 
 MaxFileTime = 3600#number of seconds of data to store to an individual output file
