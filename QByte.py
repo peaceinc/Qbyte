@@ -38,10 +38,19 @@ PushEstuary = False#uploads data to web3 at MaxFileTime interval, requires curl
 
 autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
 
-mType = sys.argv[1]#static,auto,nye
-Rmks = sys.argv[2]#remarks
-
 ###########
+
+try:
+    mType = sys.argv[1]#static,auto,nye
+except:
+    mType = 'static'
+
+try:
+    Rmks = sys.argv[2]#remarks
+except:
+    Rmks = '_'
+
+
 
 outpath = os.getcwd()
 
