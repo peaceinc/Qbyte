@@ -10,7 +10,7 @@ Steps to run locally:
 
 python QByte.py mode remarks
 
-MODE: This can be 'static' or 'auto'. The only difference between the two is that the 'auto' mode will automatically switch views.
+MODE: This can be 'static' or 'auto'. The only difference between the two is that the 'auto' mode will automatically switch views every 10 minutes.
 
 REMARKS: This is an easy way to remember your session. You can input anything without spaces.
   
