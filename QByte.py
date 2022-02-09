@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
 import os
+import subprocess
+import json
 import sys
 import serial
 from serial.tools import list_ports
@@ -30,11 +32,16 @@ wordsize = 36
 NEDspeed = 250#Number of bytes to stream from the RNG each second
 RandomSrc = 'ipfs'#'trng' = TrueRNG hardware ... 'prng' = pseudo RNG (REQUIRED TurboUse=False) ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
 SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
-TurboUse = True#Set to 'True' only if you have a TurboRNG or are running with RandomSrc = 'ipfs'
+TurboUse = True#Set to 'True' only if you have a TurboRNG or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
 #trouble may occur if using Turbo without NEDs
 
+IPFS_Estuary = True#if RandomSrc = 'ipfs', 'True' will pull from Estuary, 'False' will pull from web3.storage
+
+Genome = True#set to 'True' to XOR with genome
+GenomeSrc = 'GenomeSample.txt'#Genome source data, if Genome = 'True'
+
 MaxFileTime = 3600#number of seconds of data to store to an individual output file
-PushEstuary = False#uploads data to web3 at MaxFileTime interval, requires curl
+PushEstuary = False#uploads data to web3 at MaxFileTime interval, requires curl. REQUIRED config -> NEDspeed=250, SupHALO=True, TurboUse=True. Any RandomSrc may be used.
 
 autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
 
@@ -108,10 +115,21 @@ IpfsIdx = [0]
 MetaIdx = [0]
 
 def NewIPFS():
-
-    #data = 'https://bafybeifp5ssrdqiwtpgmci6s366ay35pmm4gqq5qp52ue5f35xigiszktu.ipfs.dweb.link/NEDpredata_0.txt'
-    data = 'https://bafybeievaadn5wv7xlxdto5m7nqn34q7nzdk5x4fpdh4sogrx4xkdg5ad4.ipfs.dweb.link/short/NEDpredata_%d.txt'%IpfsIdx[0]
     
+    if IPFS_Estuary == True:
+        estuary_json = subprocess.check_output('curl -X GET -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" https://api.estuary.tech/collections/content/bfffcaab-d302-4bab-b0ed-552e450a2dc9', shell=True)
+        estuary_arr = json.loads(estuary_json)
+        latest_cid = estuary_arr[-1]["cid"]
+        data = 'https://%s.ipfs.dweb.link'%latest_cid
+    else:
+
+        data = 'https://bafybeievaadn5wv7xlxdto5m7nqn34q7nzdk5x4fpdh4sogrx4xkdg5ad4.ipfs.dweb.link/short/NEDpredata_%d.txt'%IpfsIdx[0]
+    
+
+    #data = 'https://bafybeievaadn5wv7xlxdto5m7nqn34q7nzdk5x4fpdh4sogrx4xkdg5ad4.ipfs.dweb.link/short/NEDpredata_0.txt'
+    #data = 'https://bafybeibkvizfujdlgn34lczqphlbopd423s5p7jutglhmajobpfo5o5o2y.ipfs.dweb.link'
+
+
     print('pulling data from %s'%data)
     
     uClient = uReq(data)
@@ -126,18 +144,22 @@ def NewIPFS():
             xandy = sepfile[a][2:].split(',')
         else:
             xandy = sepfile[a].split(',')
-            
-        uNed=[]
-        for b in range (0,len(xandy)-2):
-            uNed.append(int(xandy[b]))
         
-        #if len(uNed)<250:
-        #    print(a)
+        if len(xandy)>5:
+
+            uNed=[]
+            for b in range (0,len(xandy)-2):
+                uNed.append(int(xandy[b]))
             
-        #MetaLen.append(len(uNed))
-        MetaXX.append(uNed)
+            #print(uNed)
+
+            MetaXX.append(uNed)
         
     IpfsIdx[0] += 1
+
+    print(np.shape(MetaXX))
+
+    
 
     return MetaXX
 
@@ -358,7 +380,11 @@ def newfile(n):
     outfile.close()
 
     if PushEstuary==True:
-        os.system('curl -X POST https://shuttle-5.estuary.tech/content/add -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" -H "Accept: application/json" -H "Content-Type: multipart/form-data" -F "data=@%s/QB_%d_%d_%s.txt"'%(outpath,int(starttime/1000),n-1,Rmks))
+        estout = subprocess.check_output('curl -X POST https://shuttle-5.estuary.tech/content/add -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" -H "Accept: application/json" -H "Content-Type: multipart/form-data" -F "data=@%s/QB_%d_%d_%s.txt"'%(outpath,int(starttime/1000),n-1,Rmks), shell=True)
+        estjson = json.loads(estout)
+        cid = estjson["cid"]
+        eststr = 'curl -X POST https://api.estuary.tech/collections/add-content -d' + " '{ " + '"contents": [], "cids": ["' + cid + '"], "collection": "bfffcaab-d302-4bab-b0ed-552e450a2dc9" }' + "' -H " + '"Content-Type: application/json" -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY"'
+        os.system('%s'%eststr)
 
     outfile = open('%s/QB_%d_%d_%s.txt'%(outpath,int(starttime/1000),n,Rmks),'w')
 
@@ -441,6 +467,24 @@ Readfile=open('%s/Wordbank.txt'%outpath,encoding='latin-1')
 Lines=Readfile.read().split('\n')
 for line in range(0,len(Lines)):
     AllLO.append(Lines[line])
+
+
+if Genome==True:
+    GenomeBin = ['CC','CG','CA','CT','GC','GG','GA','GT','AC','AG','AA','AT','TC','TG','TA','TT']
+    Readfile = open('%s/%s'%(outpath,GenomeSrc),'r')
+    sepfile = Readfile.read().split('\n')
+    PreSeq = []
+    for a in range (21,len(sepfile)):
+        for b in range (0,len(GenomeBin)):
+            if GenomeBin[b] in sepfile[a]:
+                PreSeq.append(b)
+    GenomeBits = []
+    for a in range (0,len(PreSeq),2):
+        GenomeBits.append((PreSeq[a]*16)+PreSeq[a+1])
+
+    # print(np.amin(GenomeBits),np.amax(GenomeBits),len(GenomeBits))
+    
+
 
 
 if RandomSrc=='trng':
@@ -536,7 +580,7 @@ def Bulk():
         if RandomSrc=='ipfs':
             supernode = GrabIPFS()
         if RandomSrc=='prng':
-            print("CONFIG ERROR: cannot use mode prng with TurboUse=True")
+            supernode = np.random.randint(0,256,TurboSpeed)
             
         tempsum = 0
         for b in range (0,len(supernode)):
@@ -601,6 +645,8 @@ def Bulk():
         PurT = pct[8]
     
     
+    GenomeIdx = ((Pur0[0]*(256**2)) + (Pur0[1]*(256**1)) + (Pur0[2]*(256**0)))
+
     for b in range (0,len(Pur0)):
         
         if SupHALO==True:
@@ -619,10 +665,19 @@ def Bulk():
         xG = xE^xF
         
         if TurboUse==True:
-        
-            x.append(xG^PurT[b])
+            xH = xG^PurT[b]
         else:
-            x.append(xG)
+            xH = xG
+
+        if Genome==True:
+            GenomeIdxX = (GenomeIdx+b)%len(GenomeBits)
+            xDNA = xH ^ GenomeBits[GenomeIdxX]
+        else:
+            xDNA = xH
+        
+        x.append(xDNA)
+
+        
         
         
         
