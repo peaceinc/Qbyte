@@ -3,6 +3,8 @@ Data Visualization for Hybrid-Quantum Clock featuring Q-Byte Processing
 
 By activating this on your desktop you will have a functioning clock featuring UTC time with Q-Byte Processing and with our data visualization featues you get to experience the spatial qualites of time. This clock unified the laws of quantum mechanics and relativity. For further detailed explantion you can download our white paper here: www.halo.computer
 
+Review video here: https://www.youtube.com/watch?v=3XkcAKzz61Q&t=2s
+
 Steps to run locally:
 
 1. Clone this directory onto your local machine
