@@ -1,7 +1,7 @@
 ## Qbyte.py
 Data Visualization for Hybrid-Quantum Clock featuring Q-Byte Processing
 
-By activating this on your desktop you will have a functioning clock featuring UTC time with Q-Byte Processing and with our data visualization featues you get to experience the spatial qualites of time. This clock unified the laws of quantum mechanics and relativity. For further detailed explantion you can download our white paper here: www.halo.computer
+By activating this on your desktop you will have a functioning clock featuring UTC time with Q-Byte Processing and with our data visualization features you get to experience the spatial qualites of time. This clock unifies the laws of quantum tunneling mechanics and relativity. For further detailed explantion you can download our white paper here: www.halo.computer
 
 Review Dr. Caputi's explanation video here: https://www.youtube.com/watch?v=3XkcAKzz61Q&t=2s
 
