@@ -381,11 +381,14 @@ def newfile(n):
     outfile.close()
 
     if PushEstuary==True:
-        estout = subprocess.check_output('curl -X POST https://shuttle-5.estuary.tech/content/add -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" -H "Accept: application/json" -H "Content-Type: multipart/form-data" -F "data=@%s/QB_%d_%d_%s.txt"'%(outpath,int(starttime/1000),n-1,Rmks), shell=True)
-        estjson = json.loads(estout)
-        cid = estjson["cid"]
-        eststr = 'curl -X POST https://api.estuary.tech/collections/add-content -d' + " '{ " + '"contents": [], "cids": ["' + cid + '"], "collection": "bfffcaab-d302-4bab-b0ed-552e450a2dc9" }' + "' -H " + '"Content-Type: application/json" -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY"'
-        os.system('%s'%eststr)
+        try:
+            estout = subprocess.check_output('curl -X POST https://shuttle-5.estuary.tech/content/add -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" -H "Accept: application/json" -H "Content-Type: multipart/form-data" -F "data=@%s/QB_%d_%d_%s.txt"'%(outpath,int(starttime/1000),n-1,Rmks), shell=True)
+            estjson = json.loads(estout)
+            cid = estjson["cid"]
+            eststr = 'curl -X POST https://api.estuary.tech/collections/add-content -d' + " '{ " + '"contents": [], "cids": ["' + cid + '"], "collection": "b5864e77-7403-4a39-b573-e122fb87267f" }' + "' -H " + '"Content-Type: application/json" -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY"'
+            os.system('%s'%eststr)
+        except:
+            print("Estuary Upload %d_%d_%s Failed"%(int(starttime/1000),n-1,Rmks))
 
     outfile = open('%s/QB_%d_%d_%s.txt'%(outpath,int(starttime/1000),n,Rmks),'w')
 
