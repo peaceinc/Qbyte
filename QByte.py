@@ -30,9 +30,9 @@ DotSize = 4444
 wordsize = 36
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
-RandomSrc = 'ipfs'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
+RandomSrc = 'prng'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
 SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
-TurboUse = True#Set to 'True' only if you have a TurboRNG (https://ubld.it/products/truerngpro) or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
+TurboUse = False#Set to 'True' only if you have a TurboRNG (https://ubld.it/products/truerngpro) or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
 #The TurboRNG acts as a reliable high-speed data source that neuromorphically entangles together the two hemispheres (4 devices on each) of the Q-Byte processing.
 #trouble may occur if using Turbo without NEDs
 
@@ -41,7 +41,7 @@ IPFS_Estuary = True#if RandomSrc = 'ipfs', 'True' will pull from Estuary, 'False
 Genome = False#set to 'True' to XOR with genome from 23 and me data file (beta feature). Turns nucleotide information (A,G,C,T) into bits that factor in to the QByte output.
 GenomeSrc = 'GenomeSample.txt'#Genome source data (this is where you can upload your DNA file from 23 and Me), ignored if Genome = 'False'
 
-MaxFileTime = 3600#number of seconds of data to store to an individual output file
+MaxFileTime = 60#number of seconds of data to store to an individual output file
 PushEstuary = False#uploads data to Estuary at MaxFileTime interval, requires curl. REQUIRED config -> NEDspeed=250, SupHALO=True, TurboUse=True. Any RandomSrc may be used.
 EstuaryCollection = '47334123-5caa-4d98-9440-3b2412579842'#'bfffcaab-d302-4bab-b0ed-552e450a2dc9'
 
@@ -203,6 +203,8 @@ ripset=[]
 zoomsto = [1]
 viewsto = [3]
 viewlong = [0]
+entsto = [1]
+SsnCt = [0]
 
 for a in range (0,10):
 
@@ -439,6 +441,22 @@ def autoview():
         
 def view(self):
     autoview()
+
+def entrain(self):
+    global ult_t
+    global MaxFileTime
+    SsnCt[0]+=1
+    tmp = entsto[0]
+    if tmp==0:
+        entsto[0] = 1
+        newfile(int(len(ult_t)/MaxFileTime))
+        bent.color = '0.5'
+    else:
+        entsto[0] = 0
+        newfile(-1*int((SsnCt[0]/2)+0.5))
+        bent.color = 'red'
+    
+    
     
 
     
@@ -454,17 +472,21 @@ axcmt = plt.axes([0.05, 0.05, 0.07, 0.05])
 bcmt = Button(axcmt, 'comment', color = '0.5', hovercolor='0.8')
 bcmt.on_clicked(comment)
 
-axkil = plt.axes([0.15, 0.05, 0.07, 0.05])
+axkil = plt.axes([0.13, 0.05, 0.07, 0.05])
 bkil = Button(axkil, 'stop', color = '0.5', hovercolor='0.8')
 bkil.on_clicked(kill)
 
-axzoom = plt.axes([0.25, 0.05, 0.07, 0.05])
+axzoom = plt.axes([0.21, 0.05, 0.07, 0.05])
 bzoom = Button(axzoom, 'zoom', color = '0.5', hovercolor='0.8')
 bzoom.on_clicked(zoom)
 
-axview = plt.axes([0.35, 0.05, 0.07, 0.05])
+axview = plt.axes([0.29, 0.05, 0.07, 0.05])
 bview = Button(axview, 'view', color = '0.5', hovercolor='0.8')
 bview.on_clicked(view)
+
+axent = plt.axes([0.37, 0.05, 0.07, 0.05])
+bent = Button(axent, 'entrain', color = '0.5', hovercolor='0.8')
+bent.on_clicked(entrain)
 
 
 AllLO=[]
@@ -929,7 +951,7 @@ def animate(i):
     ax4.clear()
     ax4t.clear()
 
-    if len(ult_t)%MaxFileTime==0 and len(ult_t)>0:
+    if len(ult_t)%MaxFileTime==0 and len(ult_t)>0 and entsto[0]==1:
         newfile(int(len(ult_t)/MaxFileTime))
     
     reds=[]
