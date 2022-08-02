@@ -3,7 +3,7 @@ Data Visualization for Hybrid-Quantum Clock featuring Q-Byte Processing
 
 By activating this on your desktop you will have a functioning clock featuring UTC time with Q-Byte Processing and with our data visualization features you get to experience the spatial qualites of time. This clock unifies the laws of quantum tunneling mechanics and relativity. For further detailed explantion you can download our white paper here: www.halo.computer
 
-Review Dr. Caputi's explanation video here: https://www.youtube.com/watch?v=3XkcAKzz61Q&t=2s
+Review Dr. Samantha Caputi's explanation video here: https://www.youtube.com/watch?v=3XkcAKzz61Q&t=2s
 
 Steps to run locally:
 
@@ -35,3 +35,9 @@ python QBread.py input_file
 Example:
 
 python QBread.py QB_1630886880_BirthdayParty.txt
+
+## MakeWordclouds.py
+
+This script will create words from a given run. Input a filename and username. Example:
+
+python MakeWordclouds.py Samantha QB_xxx.txt
