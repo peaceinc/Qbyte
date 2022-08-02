@@ -30,7 +30,7 @@ DotSize = 4444
 wordsize = 36
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
-RandomSrc = 'prng'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
+RandomSrc = 'trng'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
 SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
 TurboUse = False#Set to 'True' only if you have a TurboRNG (https://ubld.it/products/truerngpro) or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
 #The TurboRNG acts as a reliable high-speed data source that neuromorphically entangles together the two hemispheres (4 devices on each) of the Q-Byte processing.
@@ -41,7 +41,7 @@ IPFS_Estuary = True#if RandomSrc = 'ipfs', 'True' will pull from Estuary, 'False
 Genome = False#set to 'True' to XOR with genome from 23 and me data file (beta feature). Turns nucleotide information (A,G,C,T) into bits that factor in to the QByte output.
 GenomeSrc = 'GenomeSample.txt'#Genome source data (this is where you can upload your DNA file from 23 and Me), ignored if Genome = 'False'
 
-MaxFileTime = 60#number of seconds of data to store to an individual output file
+MaxFileTime = 10800#number of seconds of data to store to an individual output file
 PushEstuary = False#uploads data to Estuary at MaxFileTime interval, requires curl. REQUIRED config -> NEDspeed=250, SupHALO=True, TurboUse=True. Any RandomSrc may be used.
 EstuaryCollection = '47334123-5caa-4d98-9440-3b2412579842'#'bfffcaab-d302-4bab-b0ed-552e450a2dc9'
 
@@ -1008,7 +1008,15 @@ def animate(i):
         ival = GetI(aim[2],aim[3],useview)
         tmp_p = M2P(ival,useview)
         pval = 1/tmp_p
-        outfile.write('color change,%f,%d\n'%(ival,useview))
+        
+        x_red = []
+        x_green = []
+        x_blue = []
+        for a in range (0,len(aim[0])):
+            x_red.append(aim[0][a][0])
+            x_green.append(aim[0][a][1])
+            x_blue.append(aim[0][a][2])
+        outfile.write('color change,%f,%d,%d,%d,%d,%f\n'%(ival,useview,int(np.average(x_red)/256),int(np.average(x_green)/256),int(np.average(x_blue)/256),pval))
         MI.append(pval)
         MIt.append((int(now_p*1000)-DayStarted)/3600000)
         KMlog.append(np.log(tmp_p))
