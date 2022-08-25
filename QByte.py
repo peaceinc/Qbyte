@@ -30,9 +30,9 @@ DotSize = 4444
 wordsize = 36
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
-RandomSrc = 'trng'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
+RandomSrc = 'ipfs'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
 SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
-TurboUse = False#Set to 'True' only if you have a TurboRNG (https://ubld.it/products/truerngpro) or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
+TurboUse = True#Set to 'True' only if you have a TurboRNG (https://ubld.it/products/truerngpro) or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
 #The TurboRNG acts as a reliable high-speed data source that neuromorphically entangles together the two hemispheres (4 devices on each) of the Q-Byte processing.
 #trouble may occur if using Turbo without NEDs
 
@@ -41,9 +41,9 @@ IPFS_Estuary = True#if RandomSrc = 'ipfs', 'True' will pull from Estuary, 'False
 Genome = False#set to 'True' to XOR with genome from 23 and me data file (beta feature). Turns nucleotide information (A,G,C,T) into bits that factor in to the QByte output.
 GenomeSrc = 'GenomeSample.txt'#Genome source data (this is where you can upload your DNA file from 23 and Me), ignored if Genome = 'False'
 
-MaxFileTime = 10800#number of seconds of data to store to an individual output file
+MaxFileTime = 600#number of seconds of data to store to an individual output file
 PushEstuary = False#uploads data to Estuary at MaxFileTime interval, requires curl. REQUIRED config -> NEDspeed=250, SupHALO=True, TurboUse=True. Any RandomSrc may be used.
-EstuaryCollection = '47334123-5caa-4d98-9440-3b2412579842'#'bfffcaab-d302-4bab-b0ed-552e450a2dc9'
+EstuaryCollection = 'd0e46d0d-7e4c-4bce-8401-ee1a10b89f3d'#'bfffcaab-d302-4bab-b0ed-552e450a2dc9'
 
 autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
 
@@ -119,7 +119,7 @@ MetaIdx = [0]
 def NewIPFS():
     
     if IPFS_Estuary == True:
-        estuary_json = subprocess.check_output('curl -X GET -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" https://api.estuary.tech/collections/content/%s'%EstuaryCollection, shell=True)
+        estuary_json = subprocess.check_output('curl -X GET -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" https://api.estuary.tech/collections/content?coluuid=%s'%EstuaryCollection, shell=True)
         estuary_arr = json.loads(estuary_json)
         latest_cid = estuary_arr[-1]["cid"]
         data = 'https://%s.ipfs.dweb.link'%latest_cid
@@ -388,7 +388,7 @@ def newfile(n):
             estout = subprocess.check_output('curl -X POST https://shuttle-5.estuary.tech/content/add -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY" -H "Accept: application/json" -H "Content-Type: multipart/form-data" -F "data=@%s/QB_%d_%d_%s.txt"'%(outpath,int(starttime/1000),n-1,Rmks), shell=True)
             estjson = json.loads(estout)
             cid = estjson["cid"]
-            eststr = 'curl -X POST https://api.estuary.tech/collections/add-content -d' + " '{ " + '"contents": [], "cids": ["' + cid + '"], "collection": "%s" }'%EstuaryCollection + "' -H " + '"Content-Type: application/json" -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY"'
+            eststr = 'curl -X POST https://api.estuary.tech/collections/add-content -d' + " '{ " + '"contents": [], "cids": ["' + cid + '"], "coluuid": "%s" }'%EstuaryCollection + "' -H " + '"Content-Type: application/json" -H "Authorization: Bearer EST99cd9b05-5075-47b4-9897-f702f2e2ba2dARY"'
             os.system('%s'%eststr)
         except:
             print("Estuary Upload %d_%d_%s Failed"%(int(starttime/1000),n-1,Rmks))
@@ -485,7 +485,7 @@ bview = Button(axview, 'view', color = '0.5', hovercolor='0.8')
 bview.on_clicked(view)
 
 axent = plt.axes([0.37, 0.05, 0.07, 0.05])
-bent = Button(axent, 'entrain', color = '0.5', hovercolor='0.8')
+bent = Button(axent, 'session', color = '0.5', hovercolor='0.8')
 bent.on_clicked(entrain)
 
 
@@ -1008,15 +1008,7 @@ def animate(i):
         ival = GetI(aim[2],aim[3],useview)
         tmp_p = M2P(ival,useview)
         pval = 1/tmp_p
-        
-        x_red = []
-        x_green = []
-        x_blue = []
-        for a in range (0,len(aim[0])):
-            x_red.append(aim[0][a][0])
-            x_green.append(aim[0][a][1])
-            x_blue.append(aim[0][a][2])
-        outfile.write('color change,%f,%d,%d,%d,%d,%f\n'%(ival,useview,int(np.average(x_red)/256),int(np.average(x_green)/256),int(np.average(x_blue)/256),pval))
+        outfile.write('color change,%f,%d\n'%(ival,useview))
         MI.append(pval)
         MIt.append((int(now_p*1000)-DayStarted)/3600000)
         KMlog.append(np.log(tmp_p))
