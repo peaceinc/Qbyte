@@ -12,6 +12,7 @@ import time
 import math
 import scipy.stats
 import matplotlib.gridspec as gridspec
+import matplotlib.image as mpimg
 import warnings
 from matplotlib.widgets import Button
 import tkinter as tk
@@ -30,9 +31,9 @@ DotSize = 4444
 wordsize = 36
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
-RandomSrc = 'ipfs'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
+RandomSrc = 'trng'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
 SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
-TurboUse = True#Set to 'True' only if you have a TurboRNG (https://ubld.it/products/truerngpro) or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
+TurboUse = False#Set to 'True' only if you have a TurboRNG (https://ubld.it/products/truerngpro) or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
 #The TurboRNG acts as a reliable high-speed data source that neuromorphically entangles together the two hemispheres (4 devices on each) of the Q-Byte processing.
 #trouble may occur if using Turbo without NEDs
 
@@ -46,6 +47,10 @@ PushEstuary = False#uploads data to Estuary at MaxFileTime interval, requires cu
 EstuaryCollection = 'd0e46d0d-7e4c-4bce-8401-ee1a10b89f3d'#'bfffcaab-d302-4bab-b0ed-552e450a2dc9'
 
 autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
+
+OutputImgs = True#Runs stable diffusion
+ImgTime = 180#frequency to run Stable Diffusion
+STABLE_DIFFUSION_DIR = '/home/halo/halodev/stable-diffusion'
 
 ###########END USER CONFIGURATION###########
 
@@ -187,7 +192,7 @@ def GrabIPFS():
 
 plt.style.use('dark_background')
 #plt.grid([False])
-fig = plt.figure(constrained_layout=True)
+fig = plt.figure(1,constrained_layout=True)
 gs = fig.add_gridspec(3,2)
 ax1 = fig.add_subplot(gs[:,0], projection='3d')
 ax2 = fig.add_subplot(gs[0,1])
@@ -419,6 +424,15 @@ def zoom(self):
         zoomsto[0] = 1
     else:
         zoomsto[0] = 0
+
+def show_diffusion(self):
+
+    latest_file = sorted(os.listdir('%s/outputs/txt2img-samples'%STABLE_DIFFUSION_DIR))[-2]
+
+    plt.figure(2)
+    img = mpimg.imread('%s/outputs/txt2img-samples/%s'%(STABLE_DIFFUSION_DIR,latest_file))
+    imgplot = plt.imshow(img)
+    plt.show()
         
 
 def autoview():
@@ -468,25 +482,29 @@ inputtxt.pack()
 printButton = tk.Button(frame,text = "Submit", command = printInput)
 printButton.pack()
 
-axcmt = plt.axes([0.05, 0.05, 0.07, 0.05])
+axcmt = plt.axes([0.05, 0.05, 0.06, 0.05])
 bcmt = Button(axcmt, 'comment', color = '0.5', hovercolor='0.8')
 bcmt.on_clicked(comment)
 
-axkil = plt.axes([0.13, 0.05, 0.07, 0.05])
+axkil = plt.axes([0.12, 0.05, 0.06, 0.05])
 bkil = Button(axkil, 'stop', color = '0.5', hovercolor='0.8')
 bkil.on_clicked(kill)
 
-axzoom = plt.axes([0.21, 0.05, 0.07, 0.05])
+axzoom = plt.axes([0.19, 0.05, 0.06, 0.05])
 bzoom = Button(axzoom, 'zoom', color = '0.5', hovercolor='0.8')
 bzoom.on_clicked(zoom)
 
-axview = plt.axes([0.29, 0.05, 0.07, 0.05])
+axview = plt.axes([0.26, 0.05, 0.06, 0.05])
 bview = Button(axview, 'view', color = '0.5', hovercolor='0.8')
 bview.on_clicked(view)
 
-axent = plt.axes([0.37, 0.05, 0.07, 0.05])
+axent = plt.axes([0.33, 0.05, 0.06, 0.05])
 bent = Button(axent, 'session', color = '0.5', hovercolor='0.8')
 bent.on_clicked(entrain)
+
+aximg = plt.axes([0.40, 0.05, 0.06, 0.05])
+bimg = Button(aximg, 'latest img', color = '0.5', hovercolor='0.8')
+bimg.on_clicked(show_diffusion)
 
 
 AllLO=[]
@@ -927,6 +945,7 @@ MIt=[]
 KMlog=[]
 CumP=[]
 
+ColorWords = ''
 
 def GetI(uu,vv,typidx):
     Ksum=0.0; Kct=0; NCct=0
@@ -944,6 +963,7 @@ def GetI(uu,vv,typidx):
 
 def animate(i):
     
+    global ColorWords
 
     ax1.clear()
     ax2.clear()
@@ -953,6 +973,28 @@ def animate(i):
 
     if len(ult_t)%MaxFileTime==0 and len(ult_t)>0 and entsto[0]==1:
         newfile(int(len(ult_t)/MaxFileTime))
+
+    if OutputImgs==True and len(ult_t)%ImgTime==0 and len(ult_t)>0:
+        myprompt = ColorWords
+
+        print("generating AI image for prompt: %s"%myprompt)
+
+        present = os.getcwd()
+        os.chdir('%s'%STABLE_DIFFUSION_DIR)
+
+        output_str = subprocess.check_output(
+            [
+                'python', 'scripts/txt2img.py','--prompt', '"%s"'%myprompt, '--plms', '--H', '256', '--W', '256'
+            ],
+                
+            stderr=subprocess.STDOUT
+        )
+
+        os.chdir(present)
+
+        ColorWords = ''
+
+        
     
     reds=[]
     greens=[]
@@ -1013,6 +1055,8 @@ def animate(i):
         MIt.append((int(now_p*1000)-DayStarted)/3600000)
         KMlog.append(np.log(tmp_p))
         CumP.append(scipy.stats.chi2.sf((np.sum(KMlog)*-2),(2*len(MIt))))
+
+        ColorWords += '%s '%Bird
         
         #print(ival)
         
