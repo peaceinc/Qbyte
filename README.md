@@ -26,7 +26,7 @@ python QByte.py auto FamilyGathering
   
 As you run a session, two files are produced that are timestamped with the initialization. The one labeled '*_C.txt' contains any comments you entered, and the other contains the raw data.
 
-# Stable Diffusion
+### Stable Diffusion
 
 Q-Byte Processing can be run with Stable Diffusion, a new AI image generating module. This will create images of the words that appear when the colors change. Stable diffusion can be ontained from the github repo: https://github.com/CompVis/stable-diffusion
 
