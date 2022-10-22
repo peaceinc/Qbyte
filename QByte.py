@@ -12,6 +12,7 @@ import time
 import math
 import scipy.stats
 import matplotlib.gridspec as gridspec
+import matplotlib.image as mpimg
 import warnings
 from matplotlib.widgets import Button
 import tkinter as tk
@@ -30,7 +31,7 @@ DotSize = 4444
 wordsize = 36
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
-RandomSrc = 'ipfs'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
+RandomSrc = 'prng'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
 SupHALO = True#Set to 'True' for full (8 bitstream) QByte processing. Not reccomended for slower computers.
 TurboUse = True#Set to 'True' only if you have a TurboRNG (https://ubld.it/products/truerngpro) or are running with RandomSrc = 'ipfs'. If set to 'True' while RandomSrc = 'prng', pseudo RNG will be used to simulate TurboRNG.
 #The TurboRNG acts as a reliable high-speed data source that neuromorphically entangles together the two hemispheres (4 devices on each) of the Q-Byte processing.
@@ -47,6 +48,12 @@ EstuaryCollection = 'd0e46d0d-7e4c-4bce-8401-ee1a10b89f3d'#'bfffcaab-d302-4bab-b
 
 autofreq = 600#how often to switch view in seconds if ran in 'auto' mode
 
+OutputImgs = False#Runs stable diffusion
+ImgTime = 900#frequency to run Stable Diffusion
+Max_Words = 3#Maximum number of words for Stable Diffusion prompt
+STABLE_DIFFUSION_DIR = '/home/halo/halodev/stable-diffusion'#Path to working Stable Diffusion
+Default_Prompt = 'hypercube algorithmic language oracle'#Prompt for Stable Diffusion if no words are generated
+
 ###########END USER CONFIGURATION###########
 
 try:
@@ -62,6 +69,11 @@ except:
 
 
 outpath = os.getcwd()
+if os.path.exists('%s/dataout'%outpath)==False:
+    subprocess.check_output('mkdir dataout', shell=True)
+
+
+os.chdir('%s'%outpath)
 
 TurboSpeed = NEDspeed
 
@@ -72,8 +84,10 @@ else:
 
 
 starttime = int(time.time()*1000)
-outfile = open('%s/QB_%d_0_%s.txt'%(outpath,int(starttime/1000),Rmks),'w')
-cmtfile = open('%s/QB_%d_%s_C.txt'%(outpath,int(starttime/1000),Rmks),'w')
+outfile = open('%s/dataout/QB_%d_0_%s.txt'%(outpath,int(starttime/1000),Rmks),'w')
+cmtfile = open('%s/dataout/QB_%d_%s_C.txt'%(outpath,int(starttime/1000),Rmks),'w')
+imgfile = open('%s/dataout/QB_%d_%s_SD.txt'%(outpath,int(starttime/1000),Rmks),'w')
+
 
 outfile.write('ColorZ: %f RotZ: %f RNG params: %s %s %s\n'%(ColorZ,RotZ,RandomSrc,HALO,TurboUse))
 
@@ -187,7 +201,7 @@ def GrabIPFS():
 
 plt.style.use('dark_background')
 #plt.grid([False])
-fig = plt.figure(constrained_layout=True)
+fig = plt.figure(1,constrained_layout=True)
 gs = fig.add_gridspec(3,2)
 ax1 = fig.add_subplot(gs[:,0], projection='3d')
 ax2 = fig.add_subplot(gs[0,1])
@@ -213,8 +227,25 @@ for a in range (0,10):
     riprise.append((srise.hour+(srise.minute/60))+(24*a))
     ripset.append((sset.hour+(sset.minute/60))+(24*a))
     
-alltypes = ['hypercube','sphere','pyramid','AEM','quad']
-    
+alltypes = ['hypercube','sphere','pyramid','AEM','quad','star']
+
+def FillNode(x1,y1,x2,y2,filler_dist):
+    nodedist = (((x2-x1)**2)+((y2-y1)**2))**0.5
+    n_fillers = int(nodedist/filler_dist)
+
+    filler_x=[]
+    filler_y=[]
+
+    for a in range (0,n_fillers):
+        frac = (a+0.5)/n_fillers
+        const_x = frac*(x2-x1)
+        const_y = frac*(y2-y1)
+
+        filler_x.append(x1+const_x)
+        filler_y.append(y1+const_y)
+
+    return filler_x,filler_y
+
 def MkShape(shp):
     if shp == 'hypercube':
         
@@ -343,6 +374,40 @@ def MkShape(shp):
         ShapeC = [[2,1,0],[2,5,0],[4,1,0],[4,5,0],[1,2,0],[1,4,0],[5,2,0],[5,4,0]]
         sNode = ShapeC
         Node = [1,1,1,1,1,1,1,1]
+
+    if shp=='star':
+
+        WM_ll = 1.85
+        WM_ul = 1.95
+
+        x = [-0.807,0.287,0.318,-0.807,1]
+        y = [-0.59,0.958,-0.948,0.59,0.016]
+
+        sNode=[]
+        ShapeC=[]
+        Node=[]
+        for a in range (0,len(x)):
+            sNode.append([x[a],y[a],0])
+            ShapeC.append([x[a],y[a],0])
+            Node.append(1)
+        
+
+
+        for a in range (0,len(x)):
+
+            ll = a
+            if a==len(x)-1:
+                ul = 0
+            else:
+                ul = a+1
+
+            more_x,more_y = FillNode(x[ll],y[ll],x[ul],y[ul],0.1)
+            for b in range (0,len(more_x)):
+                xf=more_x[b]
+                yf=more_y[b]
+
+                ShapeC.append([xf,yf,0])
+                Node.append(0)
     
     infile = 'sim_%s'%shp
 
@@ -393,7 +458,7 @@ def newfile(n):
         except:
             print("Estuary Upload %d_%d_%s Failed"%(int(starttime/1000),n-1,Rmks))
 
-    outfile = open('%s/QB_%d_%d_%s.txt'%(outpath,int(starttime/1000),n,Rmks),'w')
+    outfile = open('%s/dataout/QB_%d_%d_%s.txt'%(outpath,int(starttime/1000),n,Rmks),'w')
 
 def printInput():
     inp = inputtxt.get(1.0, "end-1c")
@@ -407,6 +472,7 @@ def kill(self):
     ani.event_source.stop()
     outfile.close()
     cmtfile.close()
+    imgfile.close()
     sys.exit()
 
 def comment(self):
@@ -419,6 +485,20 @@ def zoom(self):
         zoomsto[0] = 1
     else:
         zoomsto[0] = 0
+
+def show_diffusion(self):
+
+    if OutputImgs==False:
+        print("No images to show. Please set OutputImgs=True and provide a valid Stable Diffusion path.")
+    
+    else:
+
+        latest_file = sorted(os.listdir('%s/outputs/txt2img-samples'%STABLE_DIFFUSION_DIR))[-2]
+
+        plt.figure(2)
+        img = mpimg.imread('%s/outputs/txt2img-samples/%s'%(STABLE_DIFFUSION_DIR,latest_file))
+        imgplot = plt.imshow(img)
+        plt.show()
         
 
 def autoview():
@@ -468,25 +548,29 @@ inputtxt.pack()
 printButton = tk.Button(frame,text = "Submit", command = printInput)
 printButton.pack()
 
-axcmt = plt.axes([0.05, 0.05, 0.07, 0.05])
+axcmt = plt.axes([0.05, 0.05, 0.06, 0.05])
 bcmt = Button(axcmt, 'comment', color = '0.5', hovercolor='0.8')
 bcmt.on_clicked(comment)
 
-axkil = plt.axes([0.13, 0.05, 0.07, 0.05])
+axkil = plt.axes([0.12, 0.05, 0.06, 0.05])
 bkil = Button(axkil, 'stop', color = '0.5', hovercolor='0.8')
 bkil.on_clicked(kill)
 
-axzoom = plt.axes([0.21, 0.05, 0.07, 0.05])
+axzoom = plt.axes([0.19, 0.05, 0.06, 0.05])
 bzoom = Button(axzoom, 'zoom', color = '0.5', hovercolor='0.8')
 bzoom.on_clicked(zoom)
 
-axview = plt.axes([0.29, 0.05, 0.07, 0.05])
+axview = plt.axes([0.26, 0.05, 0.06, 0.05])
 bview = Button(axview, 'view', color = '0.5', hovercolor='0.8')
 bview.on_clicked(view)
 
-axent = plt.axes([0.37, 0.05, 0.07, 0.05])
+axent = plt.axes([0.33, 0.05, 0.06, 0.05])
 bent = Button(axent, 'session', color = '0.5', hovercolor='0.8')
 bent.on_clicked(entrain)
+
+aximg = plt.axes([0.40, 0.05, 0.06, 0.05])
+bimg = Button(aximg, 'latest img', color = '0.5', hovercolor='0.8')
+bimg.on_clicked(show_diffusion)
 
 
 AllLO=[]
@@ -584,7 +668,18 @@ def M2P(MIv,typidx):
     #print(idx,MIv,np.amin(Msorted),np.amax(Msorted))
     return p_i
     
+def Color2Prompt (Cwords,Cweights,x_words):
+    wordlist = [Lx for _,Lx in sorted(zip(Cweights,Cwords),reverse=True)]
     
+    if len(wordlist)>x_words:
+        maxuse = x_words
+    else:
+        maxuse = len(wordlist)
+
+    wordprompt = ''
+    for a in range (0,maxuse):
+        wordprompt += '%s '%wordlist[a]
+    return wordprompt
 
 
 
@@ -927,6 +1022,8 @@ MIt=[]
 KMlog=[]
 CumP=[]
 
+ColorWords = []
+ColorWeights = []
 
 def GetI(uu,vv,typidx):
     Ksum=0.0; Kct=0; NCct=0
@@ -944,6 +1041,8 @@ def GetI(uu,vv,typidx):
 
 def animate(i):
     
+    global ColorWords
+    global ColorWeights
 
     ax1.clear()
     ax2.clear()
@@ -953,6 +1052,36 @@ def animate(i):
 
     if len(ult_t)%MaxFileTime==0 and len(ult_t)>0 and entsto[0]==1:
         newfile(int(len(ult_t)/MaxFileTime))
+
+    if OutputImgs==True and len(ult_t)%ImgTime==0 and len(ult_t)>0:
+        
+        myprompt = Color2Prompt(ColorWords,ColorWeights,Max_Words)
+
+        if myprompt == '':
+            myprompt = Default_Prompt
+
+        print("generating AI image for prompt: %s"%myprompt)
+
+        present = os.getcwd()
+        os.chdir('%s'%STABLE_DIFFUSION_DIR)
+
+        output_str = subprocess.check_output(
+            [
+                'python', 'scripts/txt2img.py','--prompt', '"%s"'%myprompt, '--plms', '--H', '512', '--W', '512', '--n_samples', '1'
+            ],
+                
+            stderr=subprocess.STDOUT
+        )
+
+        latest_file = sorted(os.listdir('%s/outputs/txt2img-samples'%STABLE_DIFFUSION_DIR))[-2]
+        imgfile.write('FILE: %s | PROMPT: %s\n'%(latest_file,myprompt))
+
+        os.chdir(present)
+
+        ColorWords = []
+        ColorWeights = []
+
+        
     
     reds=[]
     greens=[]
@@ -1008,11 +1137,22 @@ def animate(i):
         ival = GetI(aim[2],aim[3],useview)
         tmp_p = M2P(ival,useview)
         pval = 1/tmp_p
-        outfile.write('color change,%f,%d\n'%(ival,useview))
+
+        x_red = []
+        x_green = []
+        x_blue = []
+        for a in range (0,len(aim[0])):
+            x_red.append(aim[0][a][0])
+            x_green.append(aim[0][a][1])
+            x_blue.append(aim[0][a][2])
+        outfile.write('color change,%f,%d,%d,%d,%d,%f\n'%(ival,useview,int(np.average(x_red)/256),int(np.average(x_green)/256),int(np.average(x_blue)/256),pval))
         MI.append(pval)
         MIt.append((int(now_p*1000)-DayStarted)/3600000)
         KMlog.append(np.log(tmp_p))
         CumP.append(scipy.stats.chi2.sf((np.sum(KMlog)*-2),(2*len(MIt))))
+
+        ColorWords.append(Bird)
+        ColorWeights.append(pval)
         
         #print(ival)
         
