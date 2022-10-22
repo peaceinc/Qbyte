@@ -29,6 +29,7 @@ RotZ = 1.85#Z-score in the QByte bitstream where rotation occurs
 
 DotSize = 4444
 wordsize = 36
+Default_Marker = 'o'#for a full list: https://matplotlib.org/stable/api/markers_api.html
 
 NEDspeed = 250#Number of bytes to stream from the RNG each second
 RandomSrc = 'prng'#'trng' = TrueRNG hardware (https://ubld.it/truerng_v3) ... 'prng' = pseudo RNG ... 'ipfs' = interplenetary file system (REQUIRED config for ipfs mode -> NEDspeed=250, SupHALO=True, TurboUse=True. RNG hardware is NOT required as it will pull the data remotely.)
@@ -1240,13 +1241,13 @@ def animate(i):
                     mkr = '_'
                 ax1.scatter(mShapeC[useview][a][0],mShapeC[useview][a][1],mShapeC[useview][a][2],color=[red,green,blue],edgecolors=None,s=DotSize*2,marker=mkr)
             else:
-                ax1.scatter(mShapeC[useview][a][0],mShapeC[useview][a][1],mShapeC[useview][a][2],color=[red,green,blue],edgecolors=None,s=DotSize)
+                ax1.scatter(mShapeC[useview][a][0],mShapeC[useview][a][1],mShapeC[useview][a][2],color=[red,green,blue],edgecolors=None,s=DotSize,marker=Default_Marker)
     for a in range (0,len(mShapeC[useview])):
         if mNode[useview][a]==0:
             red = np.average(reds,weights=mDist[useview][a])
             green = np.average(greens,weights=mDist[useview][a])
             blue = np.average(blues,weights=mDist[useview][a])
-            ax1.scatter(mShapeC[useview][a][0],mShapeC[useview][a][1],mShapeC[useview][a][2],color=[red,green,blue],edgecolors=None,s=DotSize)
+            ax1.scatter(mShapeC[useview][a][0],mShapeC[useview][a][1],mShapeC[useview][a][2],color=[red,green,blue],edgecolors=None,s=DotSize,marker=Default_Marker)
             
             
     M = len(AimColors)-(2*len(viewlong))
