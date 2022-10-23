@@ -1051,6 +1051,8 @@ def animate(i):
     ax4.clear()
     ax4t.clear()
 
+
+
     if len(ult_t)%MaxFileTime==0 and len(ult_t)>0 and entsto[0]==1:
         newfile(int(len(ult_t)/MaxFileTime))
 
@@ -1075,21 +1077,21 @@ def animate(i):
         )
 
         latest_file = sorted(os.listdir('%s/outputs/txt2img-samples'%STABLE_DIFFUSION_DIR))[-2]
-        imgfile.write('FILE: %s | PROMPT: %s\n'%(latest_file,myprompt))
+        imgfile.write('TIME: %d | FILE: %s | PROMPT: %s\n'%(int(time.time()*1000),latest_file,myprompt))
 
         os.chdir(present)
 
         ColorWords = []
         ColorWeights = []
 
-        
+    now_p = time.time()
+    now = now_p-(starttime/1000)
     
     reds=[]
     greens=[]
     blues=[]
     
-    now_p = time.time()
-    now = now_p-(starttime/1000)
+
     
     if mType=='auto':
         if len(ult_t)%autofreq==0 and len(ult_t)>0:
